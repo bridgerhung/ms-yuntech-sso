@@ -206,14 +206,14 @@ export default function Home() {
         <div className="p-8 pb-4">
           <div className="max-w-md mx-auto">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              請輸入學號
+              請輸入學號或員編
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={studentId}
                 onChange={handleInputChange}
-                placeholder="例如：B11123021"
+                placeholder="例如：學號或員編"
                 className="w-full px-4 py-3 text-lg text-gray-900 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all uppercase placeholder:normal-case caret-emerald-600"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
