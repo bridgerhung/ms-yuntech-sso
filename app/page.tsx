@@ -105,14 +105,14 @@ export default function Home() {
       name: "Outlook",
       icon: <Mail className="w-8 h-8 mb-2 text-blue-600" />,
       url: "https://outlook.cloud.microsoft/mail/",
-      desc: "微軟信箱 (Live)",
+      desc: "微軟信箱 (Outlook)",
       type: "microsoft"
     },
     {
       name: "OneDrive",
       icon: <Cloud className="w-8 h-8 mb-2 text-sky-500" />,
       url: "ONEDRIVE_SPECIAL",
-      desc: "微軟雲端硬碟 (1TB)",
+      desc: "微軟雲端硬碟 (Onedrive)",
       type: "microsoft"
     },
     {
