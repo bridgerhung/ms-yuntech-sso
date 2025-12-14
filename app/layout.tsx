@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     apple: "https://webapp.yuntech.edu.tw/favicon.ico",
   },
   openGraph: {
-    title: "雲科大 數位服務傳送門",
-    description: "雲科大學生專屬的快速登入儀表板。",
+    title: "雲科大 微軟服務傳送門",
+    description: "微軟服務自動帶入 @live.yuntech.edu.tw",
     type: "website",
     // 這裡設定 Open Graph 圖片
     images: [
