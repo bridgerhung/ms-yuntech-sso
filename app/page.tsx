@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 1. 引入 useEffect
 import { 
   ExternalLink, 
   Mail, 
@@ -12,7 +12,9 @@ import {
   Presentation, 
   BarChart3,
   HardDrive,
-  ShieldCheck
+  ShieldCheck,
+  Save, // 引入 Save icon 作為視覺提示
+  Eraser // 引入 Eraser icon 用來清除
 } from "lucide-react";
 
 // 定義服務類型介面
@@ -21,17 +23,47 @@ interface ServiceItem {
   icon: React.ReactNode;
   url: string;
   desc: string;
-  type: "microsoft" | "google" | "school"; // 新增 school 類型
+  type: "microsoft" | "google" | "school"; 
 }
 
 export default function Home() {
   const [studentId, setStudentId] = useState("");
   const [error, setError] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false); // 用來確保 hydration 正確
 
   // 網域設定
   const MS_DOMAIN = "live.yuntech.edu.tw";
   const GOOGLE_DOMAIN = "gemail.yuntech.edu.tw"; 
   const MS_SHAREPOINT_PREFIX = "liveyuntechedu"; 
+  const STORAGE_KEY = "yuntech_student_id"; // LocalStorage 的 Key
+
+  // --- 核心邏輯：讀取與儲存 ---
+
+  // 1. 初始化：畫面載入時，從 LocalStorage 讀取學號
+  useEffect(() => {
+    const savedId = localStorage.getItem(STORAGE_KEY);
+    if (savedId) {
+      setStudentId(savedId);
+    }
+    setIsLoaded(true); // 標記載入完成
+  }, []);
+
+  // 2. 監聽：當 studentId 改變時，自動寫入 LocalStorage
+  useEffect(() => {
+    // 只有當載入完成後，且學號不為空才儲存
+    if (isLoaded) {
+        if (studentId) {
+            localStorage.setItem(STORAGE_KEY, studentId);
+        }
+    }
+  }, [studentId, isLoaded]);
+
+  // 3. 清除功能
+  const clearStorage = () => {
+    localStorage.removeItem(STORAGE_KEY);
+    setStudentId("");
+    setError("");
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setStudentId(e.target.value.toUpperCase().trim());
@@ -44,13 +76,11 @@ export default function Home() {
   };
 
   const handleRedirect = (service: ServiceItem) => {
-    // 學校單一入口不需要學號參數，直接跳轉
     if (service.type === "school") {
       window.open(service.url, "_blank");
       return;
     }
 
-    // 其他服務需要學號
     if (!studentId) {
       setError("請先輸入學號！");
       return;
@@ -80,10 +110,9 @@ export default function Home() {
 
   // 服務列表
   const services: ServiceItem[] = [
-    // --- 學校官方區塊 (置頂) ---
+    // --- 學校官方區塊 ---
     {
       name: "單一入口", 
-      // 使用 img 標籤直接顯示 Logo
       icon: <img 
         src="https://www-static.yuntech.edu.tw/images/mainmenu/about/yuntech_logo.jpg" 
         alt="YunTech Logo" 
@@ -168,21 +197,16 @@ export default function Home() {
     },
   ];
 
-  // 輔助函式：取得卡片樣式
+  // 樣式輔助函式 (省略修改，保持原樣)
   const getCardStyle = (type: string) => {
     switch (type) {
-      case 'google':
-        return 'hover:border-red-200 hover:bg-red-50/30';
-      case 'microsoft':
-        return 'hover:border-blue-200 hover:bg-blue-50/30';
-      case 'school':
-        return 'hover:border-emerald-500 hover:bg-emerald-50/30 border-emerald-100 bg-emerald-50/10'; // 學校專屬綠色系
-      default:
-        return 'hover:border-gray-200';
+      case 'google': return 'hover:border-red-200 hover:bg-red-50/30';
+      case 'microsoft': return 'hover:border-blue-200 hover:bg-blue-50/30';
+      case 'school': return 'hover:border-emerald-500 hover:bg-emerald-50/30 border-emerald-100 bg-emerald-50/10';
+      default: return 'hover:border-gray-200';
     }
   };
 
-  // 輔助函式：取得標籤樣式
   const getLabelStyle = (type: string) => {
     switch (type) {
       case 'google': return 'bg-red-100 text-red-600';
@@ -196,7 +220,7 @@ export default function Home() {
     <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4 font-sans">
       <div className="max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         
-        {/* Header 區塊 */}
+        {/* Header */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-500 p-8 text-center text-white">
           <h1 className="text-3xl font-bold mb-2">雲科大 數位服務傳送門</h1>
           <p className="opacity-90">整合 單一入口 • Microsoft 365 • Google Workspace</p>
@@ -205,27 +229,45 @@ export default function Home() {
         {/* 輸入區塊 */}
         <div className="p-8 pb-4">
           <div className="max-w-md mx-auto">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              請輸入學號或員編
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                請輸入學號或員編
+              </label>
+            </div>
+
             <div className="relative">
               <input
                 type="text"
                 value={studentId}
                 onChange={handleInputChange}
                 placeholder="例如：學號或員編"
-                className="w-full px-4 py-3 text-lg text-gray-900 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all uppercase placeholder:normal-case caret-emerald-600"
+                className="w-full px-4 py-3 text-lg text-gray-900 bg-white border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all uppercase placeholder:normal-case caret-emerald-600 pr-10"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    handleRedirect(services[1]); // Enter 預設進 Outlook (或可改成 services[0] 進單一入口)
+                    handleRedirect(services[1]); 
                   }
                 }}
               />
-              <div className="absolute right-3 top-3.5 text-gray-400 font-mono text-sm pointer-events-none">
-                自動切換網域
-              </div>
+              {/* 清除按鈕：只有當有學號時才顯示 */}
+              {studentId && (
+                <button 
+                  onClick={clearStorage}
+                  title="清除記憶的學號"
+                  className="absolute right-3 top-3 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <Eraser size={20} />
+                </button>
+              )}
             </div>
-            {error && <p className="text-red-500 text-sm mt-2 font-medium">{error}</p>}
+
+            {error ? (
+              <p className="text-red-500 text-sm mt-2 font-medium">{error}</p>
+            ) : (
+              <div className="absolute right-0 -bottom-6 text-gray-400 font-mono text-sm pointer-events-none hidden md:block">
+                 {/* 僅裝飾用 */}
+              </div>
+            )}
+            
             <p className="text-xs text-gray-400 mt-2 text-center">
               微軟服務帶入 @{MS_DOMAIN} <br/>
               Google 服務帶入 @{GOOGLE_DOMAIN}
@@ -245,7 +287,6 @@ export default function Home() {
                   ${service.type === 'school' ? 'border-emerald-200 shadow-sm' : 'border-gray-200'} 
                 `}
               >
-                {/* 標籤：區分 Google / MS / School */}
                 <div className={`absolute top-2 right-2 text-[10px] font-bold px-1.5 py-0.5 rounded
                   ${getLabelStyle(service.type)}
                 `}>
@@ -267,7 +308,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Footer & Privacy 區塊 */}
+        {/* Footer */}
         <div className="bg-gray-100 p-6 text-center text-xs text-gray-500">
           <p className="mb-4">非官方服務 • 自動整合 live 與 gemail 雙網域系統</p>
           
@@ -277,8 +318,8 @@ export default function Home() {
               <span>個資聲明</span>
             </div>
             <p className="leading-relaxed text-gray-600">
-              本服務純靜態，所有資料處理皆在您的裝置上完成，<br/>
-              伺服器<span className="font-bold text-gray-800">絕不保存</span>您的學號或密碼。
+              本服務純靜態，學號僅儲存於<span className="font-bold text-gray-800">您的瀏覽器 (Local Storage)</span> 方便下次使用，<br/>
+              伺服器絕不保存您的學號或密碼。
             </p>
           </div>
 
