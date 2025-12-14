@@ -124,17 +124,17 @@ export default function Home() {
     },
     // --- Microsoft 區塊 ---
     {
+      name: "學校信箱",
+      icon: <Mail className="w-8 h-8 mb-2 text-blue-600" />,
+      url: "https://outlook.cloud.microsoft/mail/",
+      desc: "Outlook",
+      type: "microsoft"
+    },
+    {
       name: "Microsoft Apps", 
       icon: <LayoutGrid className="w-8 h-8 mb-2 text-indigo-900" />,
       url: "https://m365.cloud.microsoft/apps/", 
       desc: "應用程式總覽",
-      type: "microsoft"
-    },
-    {
-      name: "Outlook",
-      icon: <Mail className="w-8 h-8 mb-2 text-blue-600" />,
-      url: "https://outlook.cloud.microsoft/mail/",
-      desc: "微軟信箱 (Outlook)",
       type: "microsoft"
     },
     {
